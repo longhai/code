@@ -1,37 +1,5 @@
 {
     "results": [{
-        
-        "email": "jimmie.andrews@example.com",
-        "login": {
-            "uuid": "70d39a8a-2717-4e55-9924-f16e6912c9f0",
-            "username": "blackfish971",
-            "password": "monte",
-            "salt": "lCeC5wuZ",
-            "md5": "8840a1731e91e441765734b456558d38",
-            "sha1": "d3a2b49804162bc9ecd080c867bd975da37cccc5",
-            "sha256": "834ded871a19c50efb640cf87e5159bddf6b6038a040d77cb025a1ff35b12da3"
-        },
-        "dob": {
-            "date": "1948-04-14T19:56:33.357Z",
-            "age": 73
-        },
-        "registered": {
-            "date": "2008-11-06T08:55:08.088Z",
-            "age": 13
-        },
-        "phone": "017687 40657",
-        "cell": "0714-922-060",
-        "id": {
-            "name": "NINO",
-            "value": "KL 83 12 90 P"
-        },
-        "picture": {
-            "large": "https://randomuser.me/api/portraits/women/61.jpg",
-            "medium": "https://randomuser.me/api/portraits/med/women/61.jpg",
-            "thumbnail": "https://randomuser.me/api/portraits/thumb/women/61.jpg"
-        },
-        "nat": "GB"
-    }, {
         "gender": "male",
         "name": {
             "title": "Mr",
