@@ -1,29 +1,6 @@
 {
     "results": [{
-        "gender": "male",
-        "name": {
-            "title": "Mr",
-            "first": "Jimmie",
-            "last": "Andrews"
-        },
-        "location": {
-            "street": {
-                "number": 1970,
-                "name": "Park Avenue"
-            },
-            "city": "Portsmouth",
-            "state": "Isle of Wight",
-            "country": "United Kingdom",
-            "postcode": "BU64 8UN",
-            "coordinates": {
-                "latitude": "-31.4947",
-                "longitude": "-3.3546"
-            },
-            "timezone": {
-                "offset": "+8:00",
-                "description": "Beijing, Perth, Singapore, Hong Kong"
-            }
-        },
+        
         "email": "jimmie.andrews@example.com",
         "login": {
             "uuid": "70d39a8a-2717-4e55-9924-f16e6912c9f0",
