@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game List</title>
+<style>
+    /* CSS để tùy chỉnh giao diện */
+    #gameList {
+        float: left;
+        width: 30%;
+        padding: 20px;
+        border-right: 1px solid #ccc;
+    }
+    #gameInfo {
+        float: left;
+        width: 60%;
+        padding: 20px;
+    }
+    #upload {
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+
+<input type="file" id="upload" accept=".xml">
+
+<div id="gameList"></div>
+<div id="gameInfo"></div>
+
+<script>
+    let selectedGame = null;
+
+    document.getElementById('upload').addEventListener('change', handleFileSelect, false);
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const xmlString = event.target.result;
+            parseXML(xmlString);
+        };
+        reader.readAsText(file);
+    }
+
+    function parseXML(xmlString) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+        
+        const games = xmlDoc.getElementsByTagName('software');
+        const gameListDiv = document.getElementById('gameList');
+        gameListDiv.innerHTML = ''; // Clear previous content
+
+        for (let i = 0; i < games.length; i++) {
+            const gameName = games[i].getAttribute('name');
+            const gameDescription = games[i].getElementsByTagName('description')[0].textContent;
+            
+            const gameItem = document.createElement('div');
+            gameItem.textContent = gameName;
+            gameItem.style.cursor = 'pointer';
+            gameItem.onclick = () => displayGameInfo(games[i]);
+            gameListDiv.appendChild(gameItem);
+        }
+    }
+
+    function displayGameInfo(game) {
+        selectedGame = game;
+        const gameInfoDiv = document.getElementById('gameInfo');
+        gameInfoDiv.innerHTML = ''; // Clear previous content
+
+        const description = game.getElementsByTagName('description')[0].textContent;
+        const year = game.getElementsByTagName('year')[0].textContent;
+        const publisher = game.getElementsByTagName('publisher')[0].textContent;
+        let players = ''; // Khởi tạo giá trị mặc định
+        let category = ''; // Khởi tạo giá trị mặc định
+
+        const playersElement = game.getElementsByTagName('players')[0];
+        if (playersElement) { // Nếu trường players đã tồn tại trong tệp XML
+            players = playersElement.textContent;
+        }
+
+        const categoryElement = game.getElementsByTagName('category')[0];
+        if (categoryElement) { // Nếu trường category đã tồn tại trong tệp XML
+            category = categoryElement.textContent;
+        }
+
+        const infoItems = game.getElementsByTagName('info');
+        let additionalInfo = '';
+        for (let i = 0; i < infoItems.length; i++) {
+            const name = infoItems[i].getAttribute('name');
+            const value = infoItems[i].getAttribute('value');
+            additionalInfo += `
+                <p>
+                    <strong>${name}:</strong>
+                    <input type="text" id="${name}" value="${value}">
+                </p>`;
+        }
+
+        gameInfoDiv.innerHTML = `
+            <h2>${description}</h2>
+            <p><strong>Year:</strong> <input type="text" id="year" value="${year}"></p>
+            <p><strong>Publisher:</strong> <input type="text" id="publisher" value="${publisher}"></p>
+            <p><strong>Players:</strong> <input type="text" id="players" value="${players}"></p> <!-- Hiển thị trường nhập cho số lượng người chơi -->
+            <p><strong>Category:</strong> <input type="text" id="category" value="${category}"></p> <!-- Hiển thị trường nhập cho danh mục -->
+            ${additionalInfo}
+            <button onclick="saveChanges()">Save</button>
+            <button onclick="downloadXML()">Download</button>
+        `;
+    }
+
+    function saveChanges() {
+        if (!selectedGame) return;
+        const infoItems = selectedGame.getElementsByTagName('info');
+        for (let i = 0; i < infoItems.length; i++) {
+            const name = infoItems[i].getAttribute('name');
+            const newValue = document.getElementById(name).value;
+            infoItems[i].setAttribute('value', newValue);
+        }
+
+        const year = document.getElementById('year').value;
+        selectedGame.getElementsByTagName('year')[0].textContent = year;
+
+        const publisher = document.getElementById('publisher').value;
+        selectedGame.getElementsByTagName('publisher')[0].textContent = publisher;
+
+        let players = document.getElementById('players').value.trim(); // Lấy giá trị từ trường nhập cho số lượng người chơi
+        players = players.trim(); // Xóa các khoảng trắng thừa
+
+        let playersElement = selectedGame.getElementsByTagName('players')[0];
+        if (!playersElement) { // Nếu trường players chưa tồn tại trong tệp XML, tạo mới nó
+            const xmlDoc = selectedGame.ownerDocument;
+            playersElement = xmlDoc.createElement('players'); // Tạo mới phần tử players mà không có namespace
+            selectedGame.appendChild(playersElement);
+        }
+        playersElement.textContent = players; // Cập nhật giá trị số lượng người chơi
+
+        let category = document.getElementById('category').value.trim(); // Lấy giá trị từ trường nhập cho danh mục
+        category = category.trim(); // Xóa các khoảng trắng thừa
+
+        let categoryElement = selectedGame.getElementsByTagName('category')[0];
+        if (!categoryElement) { // Nếu trường category chưa tồn tại trong tệp XML, tạo mới nó
+            const xmlDoc = selectedGame.ownerDocument;
+            categoryElement = xmlDoc.createElement('category'); // Tạo mới phần tử category mà không có namespace
+            selectedGame.appendChild(categoryElement);
+        }
+        categoryElement.textContent = category; // Cập nhật giá trị danh mục
+    }
+
+    function downloadXML() {
+        if (!selectedGame) return;
+        const serializer = new XMLSerializer();
+        const xmlString = serializer.serializeToString(selectedGame.ownerDocument);
+        
+        // Tạo ra một đối tượng blob từ chuỗi XML
+        const blob = new Blob([xmlString], { type: 'text/xml' });
+        const url = URL.createObjectURL(blob);
+
+        // Tạo ra một thẻ a để tải về tệp XML
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'modified_game.xml';
+        document.body.appendChild(a);
+        a.click();
+
+        // Xóa đối tượng blob sau khi đã tải về
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }, 0);
+    }
+</script>
+
+</body>
+</html>
