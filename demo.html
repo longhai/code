@@ -132,7 +132,28 @@
         http.send();
         return http.status !== 404;
     }
+// Keyboard navigation
+    document.addEventListener('keydown', function(event) {
+        if (gameItems.length === 0) return;
 
+        if (event.key === 'ArrowUp') {
+            currentIndex = (currentIndex - 1 + gameItems.length) % gameItems.length;
+        } else if (event.key === 'ArrowDown') {
+            currentIndex = (currentIndex + 1) % gameItems.length;
+        }
+
+        updateSelection();
+    });
+
+    function updateSelection() {
+        gameItems.forEach((item, index) => {
+            if (index === currentIndex) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
     // Load default source
     fetchXML(document.getElementById('sourceSelect').value, 'nes');
 </script>
