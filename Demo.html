@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game List</title>
+<style>
+    /* CSS để tùy chỉnh giao diện */
+    #gameList {
+        float: left;
+        width: 30%;
+        padding: 20px;
+        border-right: 1px solid #ccc;
+        overflow-y: auto; /* Thêm thanh cuộn dọc khi nội dung quá dài */
+        max-height: 80vh; /* Giới hạn chiều cao của #gameList với 80% chiều cao của viewport */
+    }
+    #gameInfo {
+        float: left;
+        width: 60%;
+        padding: 20px;
+    }
+    #upload {
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
 
+<select id="sourceSelect">
+    <option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/nes.xml">NES</option>
+    <option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/snes.xml">SNES</option>
+</select>
+
+<div id="gameList"></div>
+<div id="gameInfo"></div>
+
+<script>
+    document.getElementById('sourceSelect').addEventListener('change', handleSourceSelect);
+
+    function handleSourceSelect(event) {
+        const selectedSource = event.target.value;
+        const folderName = selectedSource.split('/').pop().split('.')[0]; // Lấy tên từ URL
+        fetchXML(selectedSource, folderName);
+    }
+
+    function fetchXML(sourceURL, folderName) {
+        fetch(sourceURL)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(xmlString => parseXML(xmlString, folderName))
+        .catch(error => console.error('There was a problem with the fetch operation:', error));
+    }
+
+    function parseXML(xmlString, folderName) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+        
+        const games = xmlDoc.getElementsByTagName('software');
+        const gameListDiv = document.getElementById('gameList');
+        gameListDiv.innerHTML = ''; // Clear previous content
+
+        for (let i = 0; i < games.length; i++) {
+            const gameName = games[i].getAttribute('name');
+            const gameDescription = games[i].getElementsByTagName('description')[0].textContent;
+            
+            const gameItem = document.createElement('div');
+            gameItem.textContent = gameName;
+            gameItem.style.cursor = 'pointer';
+            gameItem.onclick = () => displayGameInfo(games[i], folderName);
+            gameListDiv.appendChild(gameItem);
+        }
+    }
+
+    function displayGameInfo(game, folderName) {
+        const gameInfoDiv = document.getElementById('gameInfo');
+        gameInfoDiv.innerHTML = ''; // Clear previous content
+
+        const description = game.getElementsByTagName('description')[0].textContent;
+        const year = game.getElementsByTagName('year')[0].textContent;
+        const publisher = game.getElementsByTagName('publisher')[0].textContent;
+
+        const infoItems = game.getElementsByTagName('info');
+        let additionalInfo = '';
+        for (let i = 0; i < infoItems.length; i++) {
+            const name = infoItems[i].getAttribute('name');
+            const value = infoItems[i].getAttribute('value');
+            additionalInfo += `<p><strong>${name}:</strong> ${value}</p>`;
+        }
+
+        // Get game name
+        const gameName = game.getAttribute('name');
+        // Construct paths for images, videos, and game files
+        const imageFormats = ['jpg', 'png']; // Supported image formats
+        let imagePath = '';
+        for (let i = 0; i < imageFormats.length; i++) {
+            const format = imageFormats[i];
+            const possibleImagePath = `http://adb.arcadeitalia.net/media/mess.current/ingames/${folderName}/${gameName}.${format}`; // Thay thế link đến ảnh trên mạng
+            if (imageExists(possibleImagePath)) {
+                imagePath = possibleImagePath;
+                break;
+            }
+        }
+        const videoPath = `http://adb.arcadeitalia.net/media/mess.current/ingames/${folderName}/${gameName}.mp4`; // Thay thế link đến video trên mạng
+        const filePath = `https://example.com/${folderName}/${gameName}.zip`; // Thay thế link đến file trò chơi trên mạng
+
+        gameInfoDiv.innerHTML = `
+            <h2>${description}</h2>
+            <p><strong>Year:</strong> ${year}</p>
+            <p><strong>Publisher:</strong> ${publisher}</p>
+            ${additionalInfo}
+            <div>
+                <img src="${imagePath}" alt="${gameName} Image">
+                <video controls>
+                    <source src="${videoPath}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <a href="${filePath}" download>Download ${gameName}</a>
+            </div>
+        `;
+    }
+
+    function imageExists(imageUrl) {
+        var http = new XMLHttpRequest();
+        http.open('HEAD', imageUrl, false);
+        http.send();
+        return http.status !== 404;
+    }
+
+    // Load default source
+    fetchXML(document.getElementById('sourceSelect').value, 'nes');
+</script>
+
+</body>
+</html>
