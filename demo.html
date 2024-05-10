@@ -29,8 +29,8 @@
 <select id="sourceSelect">
     <option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/nes.xml">NES</option>
     <option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/snes.xml">SNES</option>
-<option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/gba.xml">GBA</option>
-<option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/psx.xml">PS1</option>
+    <option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/gba.xml">GBA</option>
+    <option value="https://raw.githubusercontent.com/mamedev/mame/master/hash/psx.xml">PS1</option>
     
 </select>
 
@@ -107,7 +107,7 @@
                 break;
             }
         }
-        const videoPath = `http://adb.arcadeitalia.net/media/mess.current/ingames/${folderName}/${gameName}.mp4`; // Thay thế link đến video trên mạng
+        const videoPath = `http://adb.arcadeitalia.net/download_file.php?tipo=mess_current&codice=${gameName}&list=${folderName}&entity=shortplay&oper=streaming&filler=${gameName}.mp4`; // Thay thế link đến video trên mạng
         const filePath = `https://example.com/${folderName}/${gameName}.zip`; // Thay thế link đến file trò chơi trên mạng
 
         gameInfoDiv.innerHTML = `
